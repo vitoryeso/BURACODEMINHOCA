@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Planner Semanal + Bússola Diária (imprimível)</title>
+  <style>
+    :root{
+      --bg:#0b0d10;--fg:#e9eef2;--muted:#b7c0c8;--grid:#2a2f36;--thin:#3a4048;--accent:#94a3b8;
+      --estudo:#2b6cb0; /* AZUL */
+      --projeto:#22a06b; /* VERDE */
+      --reuniao:#1b8a5a; /* VERDE escuro */
+      --exercicio:#e0772a; /* LARANJA */
+      --sono:#6b21a8; /* ROXO */
+      --ritual:#8b5cf6; /* ROXO claro */
+      --lazer:#06b6d4; /* CIANO */
+      --refeicao:#facc15; /* AMARELO */
+      --paper:#0f1216; --card:#131820; --border:#1f2530; --shadow: 0 4px 16px rgba(0,0,0,.35);
+    }
+    html,body{background:var(--bg);color:var(--fg);font-family: Inter,Segoe UI,system-ui,-apple-system,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;}
+    h1,h2,h3{margin:0}
+    .wrap{max-width:1120px;margin:32px auto;padding:0 16px}
+    .hint{color:var(--muted);font-size:12px}
+    .legend{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 16px}
+    .pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);background:var(--card);padding:6px 10px;border-radius:999px;font-size:12px}
+    .sw{width:12px;height:12px;border-radius:3px}
+
+    /* PAGE containers */
+    .page{background:var(--paper);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);padding:16px;margin:18px 0}
+    .page.a4-landscape{aspect-ratio: 297/210; width:100%;}
+    .page.a4-portrait{aspect-ratio: 210/297; width:100%;}
+    .page-title{display:flex;justify-content:space-between;align-items:end;margin-bottom:8px}
+    .sub{color:var(--muted);font-size:12px}
+
+    /* WEEKLY GRID */
+    .weekly{display:grid;grid-template-columns: 72px repeat(7,1fr);gap:0;border-top:1px solid var(--grid);border-left:1px solid var(--grid);position:relative;height: calc(100% - 56px);}
+    .day-head{display:grid;grid-template-columns: 72px repeat(7,1fr);margin:6px 0 10px}
+    .day-head > div{padding:6px 4px;text-align:center;border:1px solid var(--grid);border-bottom:none;background:linear-gradient(180deg, #151a22, #10151b)}
+    .day-head > div:first-child{text-align:left;padding-left:8px}
+    .time-col{display:flex;flex-direction:column}
+    .time{height: calc((100%)/32); /* 16h * 2 slots */
+          border-bottom:1px solid var(--grid); color:var(--muted);font-size:10px;display:flex;align-items:flex-start;justify-content:flex-end;padding:2px 6px}
+    .slot{border-right:1px solid var(--grid);position:relative}
+    .slot:before{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:var(--thin);opacity:.5}
+    .col{border-right:1px solid var(--grid);position:relative}
+
+    .event{position:absolute;left:0;right:0;margin:0 4px;border-radius:8px;padding:6px 8px;font-size:11px;line-height:1.15;border:1px solid rgba(255,255,255,.08);box-shadow: 0 1px 4px rgba(0,0,0,.35)}
+    .event small{display:block;opacity:.8}
+
+    .estudo{background: color-mix(in srgb, var(--estudo) 85%, #000 15%)}
+    .projeto{background: color-mix(in srgb, var(--projeto) 85%, #000 15%)}
+    .reuniao{background: color-mix(in srgb, var(--reuniao) 85%, #000 15%)}
+    .exercicio{background: color-mix(in srgb, var(--exercicio) 85%, #000 15%)}
+    .lazer{background: color-mix(in srgb, var(--lazer) 85%, #000 15%)}
+    .refeicao{background: color-mix(in srgb, var(--refeicao) 85%, #000 15%);color:#111}
+
+    /* DAILY A5 (two per A4) */
+    .daily-sheet{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .a5{background:var(--card);border:1px dashed var(--border);border-radius:12px;padding:12px;display:grid;grid-template-columns: 65% 35%;gap:10px}
+    .a5 h3{font-size:14px;margin:6px 0}
+    .a5 small{color:var(--muted)}
+    .control{display:flex;gap:8px;align-items:center}
+    input[type="text"], select, input[type="date"]{background:#0e1319;border:1px solid var(--border);color:var(--fg);border-radius:8px;padding:6px 8px}
+    .checkbox{display:flex;align-items:center;gap:8px;font-size:12px}
+
+    .hours{position:relative;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:linear-gradient(180deg,#0d1218,#0c1015)}
+    .row{position:relative;height:36px;border-bottom:1px solid var(--grid)}
+    .row:before{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:var(--thin);opacity:.5}
+    .label{position:absolute;left:6px;top:4px;color:var(--muted);font-size:10px}
+    .ghost{position:absolute;left:10px;right:10px;border-radius:8px;border:1px dashed var(--thin);opacity:.35;padding:4px 6px;font-size:10px}
+
+    .right-pane{display:flex;flex-direction:column;gap:10px}
+    .box{border:1px solid var(--border);border-radius:10px;padding:8px;background:linear-gradient(180deg,#0f141b,#0c1015)}
+    .box h4{margin:0 0 6px 0;font-size:12px;color:var(--accent)}
+    .todo{display:grid;gap:6px}
+
+    /* PRINT */
+    @media print{
+      body{background:#fff;color:#000}
+      .wrap{max-width:none;margin:0;padding:0}
+      .hint,.controls{display:none !important}
+      .page{box-shadow:none;border:0;border-radius:0;margin:0;padding:8mm}
+      .page-title{margin-bottom:2mm}
+      .a4-landscape{width: 297mm; height: 210mm;}
+      .a4-portrait{width: 210mm; height: 297mm;}
+      .daily-sheet{grid-template-columns:1fr 1fr;gap:8mm}
+      .a5{height: 130mm}
+      .page-break{page-break-after: always}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="page a4-landscape">
+      <div class="page-title">
+        <div>
+          <h2>Mapa Semanal Estratégico</h2>
+          <div class="sub">A4 — Paisagem · 06:00 → 22:00 · Blocos coloridos por categoria</div>
+        </div>
+        <div class="legend">
+          <span class="pill"><span class="sw" style="background:var(--estudo)"></span> Estudo (AZUL)</span>
+          <span class="pill"><span class="sw" style="background:var(--projeto)"></span> Projeto (VERDE)</span>
+          <span class="pill"><span class="sw" style="background:var(--reuniao)"></span> Reunião (VERDE esc.)</span>
+          <span class="pill"><span class="sw" style="background:var(--exercicio)"></span> Exercício (LARANJA)</span>
+          <span class="pill"><span class="sw" style="background:var(--lazer)"></span> Lazer (CIANO)</span>
+          <span class="pill"><span class="sw" style="background:var(--refeicao)"></span> Refeição (AMARELO)</span>
+        </div>
+      </div>
+      <div class="day-head">
+        <div>Hora</div>
+        <div>SEGUNDA</div>
+        <div>TERÇA</div>
+        <div>QUARTA</div>
+        <div>QUINTA</div>
+        <div>SEXTA</div>
+        <div>SÁBADO</div>
+        <div>DOMINGO</div>
+      </div>
+      <!-- 16 horas (06 -> 22) em meias-horas == 32 linhas -->
+      <div id="weekly" class="weekly">
+        <div class="time-col">
+          <!-- build time labels dynamically via JS -->
+        </div>
+        <!-- Seven day columns -->
+        <div class="col" data-day="1"></div>
+        <div class="col" data-day="2"></div>
+        <div class="col" data-day="3"></div>
+        <div class="col" data-day="4"></div>
+        <div class="col" data-day="5"></div>
+        <div class="col" data-day="6"></div>
+        <div class="col" data-day="0"></div>
+      </div>
+      <div class="hint">Dica: imprima várias cópias e fixe a da semana vigente na parede. Marque alterações a lápis.</div>
+    </div>
+
+    <div class="page a4-portrait page-break">
+      <div class="page-title">
+        <div>
+          <h2>Bússola Diária (duas por página)</h2>
+          <div class="sub">A4 — Retrato · recorte ao meio · selecione o dia para pré-preencher os blocos fantasma</div>
+        </div>
+        <div class="controls control">
+          <label for="dia">Dia:</label>
+          <select id="dia">
+            <option value="1">Segunda</option>
+            <option value="2">Terça</option>
+            <option value="3">Quarta</option>
+            <option value="4" selected>Quinta</option>
+            <option value="5">Sexta</option>
+            <option value="6">Sábado</option>
+            <option value="0">Domingo</option>
+          </select>
+        </div>
+      </div>
+      <div class="daily-sheet">
+        <div class="a5"> <!-- LEFT A5 -->
+          <div>
+            <div class="control" style="justify-content:space-between">
+              <div><strong>Data:</strong> <input type="date" /></div>
+              <div><strong>D S T Q Q S S</strong></div>
+            </div>
+            <h3>🎯 Missão Crítica do Dia</h3>
+            <div class="box" style="height:56px"></div>
+            <h3 style="margin-top:8px">Cronograma (06:00–22:00)</h3>
+            <div class="hours" id="hours-left"></div>
+            <small>Use ✔︎ nos quadros ao concluir cada bloco.</small>
+          </div>
+          <div class="right-pane">
+            <div class="box">
+              <h4>✅ Tarefas Flexíveis</h4>
+              <div class="todo">
+                <label class="checkbox"><input type="checkbox"/> Comprar planner</label>
+                <label class="checkbox"><input type="checkbox"/> Revisar Questão 4</label>
+                <label class="checkbox"><input type="checkbox"/> Enviar e-mail</label>
+              </div>
+            </div>
+            <div class="box" style="min-height:120px">
+              <h4>💡 Notas & Faíscas</h4>
+              <div style="height:100px"></div>
+            </div>
+            <div class="box">
+              <h4>⭐ Revisão do Dia</h4>
+              <div class="todo">
+                <label class="checkbox">Humor (1–5): ____</label>
+                <label class="checkbox">Aprendizado/Gratidão: ___________</label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="a5"> <!-- RIGHT A5 duplicate for cutting -->
+          <div>
+            <div class="control" style="justify-content:space-between">
+              <div><strong>Data:</strong> <input type="date" /></div>
+              <div><strong>D S T Q Q S S</strong></div>
+            </div>
+            <h3>🎯 Missão Crítica do Dia</h3>
+            <div class="box" style="height:56px"></div>
+            <h3 style="margin-top:8px">Cronograma (06:00–22:00)</h3>
+            <div class="hours" id="hours-right"></div>
+            <small>Use ✔︎ nos quadros ao concluir cada bloco.</small>
+          </div>
+          <div class="right-pane">
+            <div class="box">
+              <h4>✅ Tarefas Flexíveis</h4>
+              <div class="todo">
+                <label class="checkbox"><input type="checkbox"/> Comprar planner</label>
+                <label class="checkbox"><input type="checkbox"/> Revisar Questão 5</label>
+                <label class="checkbox"><input type="checkbox"/> Preparar materiais</label>
+              </div>
+            </div>
+            <div class="box" style="min-height:120px">
+              <h4>💡 Notas & Faíscas</h4>
+              <div style="height:100px"></div>
+            </div>
+            <div class="box">
+              <h4>⭐ Revisão do Dia</h4>
+              <div class="todo">
+                <label class="checkbox">Humor (1–5): ____</label>
+                <label class="checkbox">Aprendizado/Gratidão: ___________</label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="hint">Imprima em modo retrato. Recorte ao meio para duas folhas A5. Escolha o dia no seletor antes de imprimir para pré-visualizar os blocos fantasma.</div>
+    </div>
+  </div>
+
+  <script>
+    // Eventos derivados do XML fornecido (dias: 0=Dom,1=Seg,...,6=Sáb)
+    const events = [
+      { title:"Chinês (aula)", class:"event-estudo", start:"06:30", end:"07:30", days:[2,4] },
+      { title:"Reunião FabLLM (externa)", class:"event-reuniao", start:"08:30", end:"09:30", days:[4] },
+      { title:"FabLLM — Execuções pós-reunião", class:"event-projeto", start:"09:30", end:"12:00", days:[4] },
+      { title:"FlowGen — Infra + Coordenação", class:"event-projeto", start:"13:30", end:"17:30", days:[4] },
+      { title:"🎯 FOCO: Questões de Algoritmos (Bloco 1)", class:"event-estudo", start:"19:00", end:"20:30", days:[4] },
+
+      { title:"🏋️ Academia (Full Body)", class:"event-exercicio", start:"06:30", end:"07:30", days:[1,3,5] },
+      { title:"🎯 FOCO: Questões de Algoritmos (Bloco 2)", class:"event-estudo", start:"08:30", end:"10:30", days:[5] },
+      { title:"📞 Reunião FlowGen", class:"event-reuniao", start:"10:30", end:"11:30", days:[5] },
+      { title:"🎯 FOCO: Questões de Algoritmos (Bloco 3)", class:"event-projeto", start:"13:30", end:"17:30", days:[5] },
+      { title:"⚽ Futebol", class:"event-exercicio", start:"18:00", end:"19:00", days:[5] },
+
+      { title:"🏃 Corrida leve / descanso ativo", class:"event-exercicio", start:"06:30", end:"07:30", days:[6] },
+      { title:"🎯 FOCO: Questões de Algoritmos (Bloco 4)", class:"event-estudo", start:"09:00", end:"12:00", days:[6] },
+      { title:"⚽ Futebol", class:"event-exercicio", start:"16:00", end:"18:30", days:[6] },
+
+      { title:"📖 Leitura / Espiritualidade", class:"event-lazer", start:"08:00", end:"09:00", days:[0] },
+      { title:"🎯 FOCO FINAL: Revisão das Questões (Bloco 5)", class:"event-estudo", start:"14:00", end:"17:30", days:[0] },
+    ];
+
+    const classMap = {
+      'event-estudo':'estudo',
+      'event-projeto':'projeto',
+      'event-reuniao':'reuniao',
+      'event-exercicio':'exercicio',
+      'event-lazer':'lazer',
+      'event-refeicao':'refeicao',
+      'event-sono':'sono',
+      'event-ritual':'ritual'
+    };
+
+    // Build weekly time labels and half-hour rows
+    const weekly = document.getElementById('weekly');
+    const timeCol = weekly.querySelector('.time-col');
+    const startH = 6, endH = 22; // inclusive start, exclusive end
+    for(let h=startH; h<endH; h++){
+      // hour label row (top half)
+      const t = document.createElement('div');
+      t.className = 'time';
+      t.textContent = String(h).padStart(2,'0')+':00';
+      timeCol.appendChild(t);
+      // :30 row label (blank but keeps grid line)
+      const t2 = document.createElement('div');
+      t2.className = 'time';
+      t2.textContent = '';
+      timeCol.appendChild(t2);
+    }
+
+    function toMinutes(s){const [H,M]=s.split(':').map(Number);return H*60+M}
+    const base = startH*60;
+    const total = (endH-startH)*60;
+
+    function placeWeekly(){
+      // clear previous
+      weekly.querySelectorAll('.col').forEach(col => col.innerHTML='');
+      events.forEach(ev => {
+        ev.days.forEach(d=>{
+          const col = weekly.querySelector(`.col[data-day="${d}"]`);
+          if(!col) return;
+          const top = ((toMinutes(ev.start)-base)/total)*100;
+          const height = ((toMinutes(ev.end)-toMinutes(ev.start))/total)*100;
+          const e = document.createElement('div');
+          e.className = `event ${classMap[ev.class]||'estudo'}`;
+          e.style.top = `calc(${top}% + 1px)`;
+          e.style.height = `calc(${height}% - 2px)`;
+          e.innerHTML = `<strong>${ev.title}</strong><small>${ev.start}–${ev.end}</small>`;
+          col.appendChild(e);
+        })
+      })
+    }
+
+    function buildDaily(containerId, day){
+      const host = document.getElementById(containerId);
+      host.innerHTML = '';
+      for(let h=startH; h<endH; h++){
+        const row = document.createElement('div');
+        row.className = 'row';
+        const label = document.createElement('div');
+        label.className = 'label';
+        label.textContent = String(h).padStart(2,'0')+':00';
+        row.appendChild(label);
+        host.appendChild(row);
+      }
+      // ghosts for selected day
+      const dayEvents = events.filter(ev => ev.days.includes(day));
+      dayEvents.forEach(ev=>{
+        const top = ((toMinutes(ev.start)-base)/((endH-startH)*60))*100;
+        const height = ((toMinutes(ev.end)-toMinutes(ev.start))/((endH-startH)*60))*100;
+        const g = document.createElement('div');
+        g.className = 'ghost';
+        g.style.top = `calc(${top}% + 4px)`;
+        g.style.height = `calc(${height}% - 8px)`;
+        g.style.background = 'transparent';
+        g.style.borderColor = 'var(--thin)';
+        g.textContent = ev.title + ` (${ev.start}–${ev.end})`;
+        host.appendChild(g);
+      })
+    }
+
+    placeWeekly();
+    const diaSel = document.getElementById('dia');
+    function refreshDaily(){
+      const d = parseInt(diaSel.value,10);
+      buildDaily('hours-left', d);
+      buildDaily('hours-right', d);
+    }
+    diaSel.addEventListener('change', refreshDaily);
+    refreshDaily();
+  </script>
+</body>
+</html>
