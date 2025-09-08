@@ -1,0 +1,12 @@
+{
+  "name": "mapa-de-rimas",
+  "private": true,
+  "type": "module",
+  "version": "0.0.0",
+  "scripts": {
+    "gen:pdf": "node scripts/generate-pdf.mjs"
+  },
+  "dependencies": {
+    "jspdf": "2.5.1"
+  }
+}
