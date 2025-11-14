@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Neuromancer Live Narrator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #06090f;
+        --panel: #0c1320;
+        --subtle: #182134;
+        --border: rgba(142, 190, 255, 0.14);
+        --text: #e5eeff;
+        --muted: #9fb4d6;
+        --accent: #6ee7ff;
+        --accent-strong: #99f6ff;
+        font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: radial-gradient(900px 700px at 18% -5%, rgba(110, 231, 255, 0.08), transparent) var(--bg);
+        color: var(--text);
+        padding: 24px;
+        display: flex;
+        justify-content: center;
+      }
+      .page {
+        width: min(1100px, 100%);
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+      .page-header {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding: 16px 20px;
+        border-radius: 18px;
+        background: linear-gradient(160deg, rgba(99, 102, 241, 0.18), rgba(59, 130, 246, 0.08)) var(--panel);
+        border: 1px solid var(--border);
+        box-shadow: 0 14px 40px rgba(2, 6, 23, 0.55);
+      }
+      .page-header h1 {
+        margin: 0;
+        font-size: clamp(28px, 4vw, 36px);
+        font-weight: 700;
+      }
+      .page-header p {
+        margin: 0;
+        color: var(--muted);
+        max-width: 70ch;
+      }
+      .nav-link {
+        color: var(--accent);
+        text-decoration: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .panels {
+        display: grid;
+        gap: 24px;
+      }
+      @media (min-width: 960px) {
+        .panels {
+          grid-template-columns: 1fr 0.9fr;
+        }
+      }
+      .panel {
+        background: rgba(12, 19, 32, 0.92);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        box-shadow: 0 18px 36px rgba(2, 6, 23, 0.6);
+      }
+      .panel h2 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 600;
+      }
+      label {
+        font-size: 14px;
+        color: var(--muted);
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      input[type="file"],
+      input[type="number"],
+      select,
+      textarea {
+        border-radius: 10px;
+        border: 1px solid rgba(148, 163, 184, 0.24);
+        background: rgba(12, 19, 32, 0.96);
+        color: var(--text);
+        padding: 10px 12px;
+        font-size: 15px;
+        font-family: inherit;
+      }
+      textarea {
+        min-height: 240px;
+        resize: vertical;
+        line-height: 1.55;
+      }
+      .grid {
+        display: grid;
+        gap: 12px;
+      }
+      .grid.two {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      }
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+      button {
+        appearance: none;
+        border-radius: 10px;
+        border: 1px solid rgba(148, 163, 184, 0.32);
+        background: linear-gradient(180deg, rgba(14, 23, 40, 0.95), rgba(11, 17, 29, 0.95));
+        color: var(--text);
+        padding: 10px 18px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.08s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.5);
+      }
+      button.primary {
+        background: linear-gradient(180deg, rgba(55, 136, 255, 0.22), rgba(21, 74, 170, 0.22));
+        border-color: rgba(110, 231, 255, 0.45);
+        color: var(--accent-strong);
+      }
+      button:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+      .status-line {
+        font-size: 14px;
+        color: var(--muted);
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .status-line strong {
+        color: var(--accent-strong);
+      }
+      .muted {
+        color: rgba(148, 163, 184, 0.75);
+        font-size: 13px;
+        line-height: 1.5;
+      }
+      .log {
+        background: var(--subtle);
+        border-radius: 14px;
+        padding: 12px;
+        min-height: 200px;
+        max-height: 360px;
+        overflow: auto;
+        font-family: ui-monospace, SFMono-Regular, SFMono, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        font-size: 13px;
+        line-height: 1.6;
+        border: 1px solid rgba(99, 102, 241, 0.12);
+      }
+      .log-entry {
+        margin-bottom: 8px;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+      .log-entry.info { color: var(--muted); }
+      .log-entry.success { color: #34d399; }
+      .log-entry.error { color: #fca5a5; }
+      audio {
+        width: 100%;
+        border-radius: 12px;
+        background: rgba(12, 19, 32, 0.96);
+        border: 1px solid rgba(148, 163, 184, 0.24);
+        padding: 6px;
+      }
+      .stack {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header class="page-header">
+        <a class="nav-link" href="/">
+          ← back to Mapa de Rimas
+        </a>
+        <h1>Neuromancer Live Narrator</h1>
+        <p>
+          Stream William Gibson’s classic in real-time using the OpenAI Realtime API. Load your own copy of the text, chunk it automatically, and listen as the voice model narrates passages sequentially.
+        </p>
+        <p class="muted">
+          Provide a legal copy of the novel that you’re allowed to use, or experiment with the bundled 10&nbsp;MB stress-test file to validate chunking and buffering before streaming the real text.
+        </p>
+      </header>
+      <div class="panels">
+        <section class="panel">
+          <h2>Source Material</h2>
+          <div class="grid">
+            <label>
+              Upload text file
+              <input id="file-input" type="file" accept=".txt,text/plain" />
+            </label>
+            <div class="controls">
+              <button id="load-test-btn" type="button">Load 10&nbsp;MB test file</button>
+              <button id="clear-text-btn" type="button">Clear</button>
+            </div>
+          </div>
+          <label>
+            Text to narrate
+            <textarea id="text-input" placeholder="Paste Neuromancer text here…"></textarea>
+          </label>
+          <div class="grid two">
+            <label>
+              Voice
+              <select id="voice-select">
+                <option value="verse">verse · cinematic baritone</option>
+                <option value="alloy">alloy · bright narrator</option>
+                <option value="sol">sol · warm storyteller</option>
+                <option value="lola">lola · neutral</option>
+                <option value="ember">ember · calm alto</option>
+              </select>
+            </label>
+            <label>
+              Chunk size (characters)
+              <input id="chunk-size" type="number" min="600" max="4000" step="100" value="1400" />
+            </label>
+            <label>
+              Chunk limit per run
+              <input id="chunk-limit" type="number" min="1" max="200" step="1" value="6" />
+            </label>
+            <label>
+              Continue automatically
+              <select id="auto-continue">
+                <option value="true" selected>Yes — read next chunk when ready</option>
+                <option value="false">No — wait for my prompt</option>
+              </select>
+            </label>
+          </div>
+          <div class="controls">
+            <button id="connect-btn" class="primary" type="button">Start narration</button>
+            <button id="next-chunk-btn" type="button" disabled>Send next chunk</button>
+            <button id="stop-btn" type="button" disabled>Stop</button>
+          </div>
+          <div class="status-line">
+            <div>Status: <strong id="status-text">idle</strong></div>
+            <div>Chunks: <strong id="progress-text">0 / 0</strong></div>
+          </div>
+          <p class="muted">
+            Tip: keep chunk sizes under ~1,800 characters to stay within comfortable context limits. Increase the chunk limit gradually when testing longer passages.
+          </p>
+        </section>
+        <section class="panel">
+          <h2>Realtime Audio Monitor</h2>
+          <div class="stack">
+            <audio id="audio-player" controls autoplay></audio>
+            <div class="status-line">
+              <div>Last event: <strong id="last-event">—</strong></div>
+              <div>Transcript preview:</div>
+            </div>
+            <textarea id="transcript" readonly placeholder="Live transcript from the Realtime API…" style="min-height: 160px;"></textarea>
+          </div>
+          <div>
+            <h3 style="margin: 12px 0 8px; font-size: 16px; font-weight: 600;">Event log</h3>
+            <div id="log" class="log" aria-live="polite"></div>
+          </div>
+        </section>
+      </div>
+    </div>
+    <script type="module" src="/src/neuromancer.js"></script>
+  </body>
+</html>
+
