@@ -1,0 +1,27 @@
+{
+  "name": "workspace",
+  "version": "1.0.0",
+  "description": "Banco das minhas L0MBR4S",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "NODE_ENV=development node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vitoryeso/BURACODEMINHOCA.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vitoryeso/BURACODEMINHOCA/issues"
+  },
+  "homepage": "https://github.com/vitoryeso/BURACODEMINHOCA#readme",
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0"
+  }
+}

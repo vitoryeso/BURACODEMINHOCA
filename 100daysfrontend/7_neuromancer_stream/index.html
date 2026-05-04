@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mapa de Rimas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/src/styles.css">
+  </head>
+  <body>
+    <div class="app">
+      <header class="app-header">
+        <div class="brand">Mapa de Rimas</div>
+        <div class="header-actions">
+          <button id="btn-export-pdf" class="btn primary">Exportar PDF</button>
+          <button id="btn-print" class="btn">Imprimir</button>
+        </div>
+      </header>
+
+      <main class="app-main">
+        <section class="controls" aria-label="Controles de reprodução">
+          <div class="control-group">
+            <label for="select-theme">Tema</label>
+            <select id="select-theme" class="select"></select>
+          </div>
+
+          <div class="control-group row">
+            <button id="btn-prev-theme" class="btn">◀ Tema</button>
+            <button id="btn-next-theme" class="btn">Tema ▶</button>
+          </div>
+
+          <div class="control-group row">
+            <button id="btn-prev-word" class="btn">◀ Palavra</button>
+            <button id="btn-play" class="btn primary">▶ Iniciar</button>
+            <button id="btn-pause" class="btn" disabled>⏸ Pausar</button>
+            <button id="btn-next-word" class="btn">Palavra ▶</button>
+          </div>
+
+          <div class="control-group">
+            <label for="speed-range">Velocidade (segundos por palavra)</label>
+            <input id="speed-range" type="range" min="0.4" max="3.0" step="0.1" value="1.2" />
+            <div class="hint"><span id="speed-value">1.2</span>s</div>
+          </div>
+
+          <div class="control-group row">
+            <label class="checkbox">
+              <input id="auto-advance-theme" type="checkbox" checked />
+              <span>Avançar para o próximo tema automaticamente</span>
+            </label>
+          </div>
+        </section>
+
+        <section class="display" aria-live="polite">
+          <h1 id="theme-title" class="theme-title">Tema</h1>
+          <div class="word-stage" aria-label="Palavras em exibição">
+            <span id="word-a" class="word visible"></span>
+            <span id="word-b" class="word"></span>
+          </div>
+        </section>
+      </main>
+
+      <footer class="app-footer">
+        <p>
+          Dica: espaço para reproduzir/pausar • setas para navegar • Ctrl/Cmd+P para imprimir em A4
+        </p>
+      </footer>
+
+      <!-- Área de impressão (gerada dinamicamente) -->
+      <section id="print-root" class="print-root" aria-hidden="true"></section>
+    </div>
+
+    <!-- jsPDF (UMD) para exportação de PDF programática -->
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <!-- App -->
+    <script type="module" src="/src/app.js"></script>
+  </body>
+  </html>
+

@@ -1,0 +1,110 @@
+:root {
+  --bg: #0b0f14;
+  --panel: #101720;
+  --text: #e7eef7;
+  --muted: #9fb2c7;
+  --brand: #6ee7ff;
+  --brand-ink: #003a57;
+  --accent: #a78bfa;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+  color: var(--text);
+  background: radial-gradient(1200px 800px at 20% 10%, #10141c, var(--bg));
+}
+
+.app { display: grid; grid-template-rows: auto 1fr auto; min-height: 100vh; }
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: linear-gradient(to right, #0d141c, #0f1620);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  position: sticky; top: 0; z-index: 100;
+}
+.brand { font-weight: 800; letter-spacing: 0.3px; color: var(--brand); }
+.header-actions { display: flex; gap: 8px; }
+
+.btn {
+  appearance: none;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: #131a25;
+  color: var(--text);
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.04s ease, background 0.2s ease, border-color 0.2s ease;
+}
+.btn:hover { background: #162133; }
+.btn:active { transform: translateY(1px); }
+.btn:disabled { opacity: 0.55; cursor: not-allowed; }
+.btn.primary {
+  background: linear-gradient(180deg, #1a2636, #122032);
+  border-color: rgba(110, 231, 255, 0.5);
+  box-shadow: 0 0 0 1px rgba(110, 231, 255, 0.1) inset, 0 8px 16px rgba(110, 231, 255, 0.08);
+}
+
+.app-main { display: grid; grid-template-columns: 360px 1fr; gap: 16px; padding: 16px; }
+
+.controls {
+  background: var(--panel);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 14px;
+  padding: 16px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+.control-group { display: flex; flex-direction: column; gap: 6px; }
+.control-group.row { flex-direction: row; align-items: center; gap: 8px; }
+label { font-size: 14px; color: var(--muted); }
+.select { background: #0f1520; color: var(--text); border: 1px solid rgba(255,255,255,0.12); padding: 8px 10px; border-radius: 10px; }
+.checkbox { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted); }
+.hint { font-size: 12px; color: var(--muted); }
+
+.display {
+  background: radial-gradient(1200px 600px at 80% -10%, rgba(167,139,250,0.12), transparent), var(--panel);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 18px;
+  padding: 24px;
+  display: grid; grid-template-rows: auto 1fr;
+}
+.theme-title { margin: 0 0 16px; font-size: 22px; color: var(--muted); font-weight: 600; letter-spacing: 0.2px; }
+.word-stage { position: relative; overflow: hidden; height: 48vh; min-height: 260px; display: grid; place-items: center; }
+.word { position: absolute; font-size: clamp(42px, 8vw, 96px); font-weight: 800; letter-spacing: 0.6px; opacity: 0; transform: translateY(16px) scale(0.98); transition: opacity 280ms ease, transform 420ms cubic-bezier(.2,.8,.2,1); color: #e8f6ff; text-shadow: 0 10px 30px rgba(110,231,255,0.2), 0 2px 10px rgba(0,0,0,0.5); }
+.word.visible { opacity: 1; transform: translateY(0) scale(1); }
+
+.app-footer { padding: 10px 16px; color: var(--muted); font-size: 13px; text-align: center; }
+
+/* Impressão */
+@media print {
+  body { background: white; color: black; }
+  .app-header, .app-footer, .app-main .controls, .display { display: none !important; }
+  .print-root { display: block !important; }
+}
+
+.print-root { display: none; }
+.print-page {
+  width: 210mm; height: 297mm; /* A4 */
+  padding: 18mm 16mm; page-break-after: always; background: white; color: #0a0a0a;
+  display: flex; flex-direction: column; gap: 10mm;
+}
+.print-title { font-size: 18pt; font-weight: 700; color: #0a0a0a; margin: 0; }
+.print-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6mm; align-content: start; }
+.print-word { font-size: 12pt; padding: 6px 8px; border-radius: 6px; border: 1px dashed #cfd7df; background: #f8fafc; }
+
+@page {
+  size: A4 portrait;
+  margin: 0;
+}
+
+/* Responsivo */
+@media (max-width: 960px) {
+  .app-main { grid-template-columns: 1fr; }
+  .word-stage { height: 40vh; }
+}
+
