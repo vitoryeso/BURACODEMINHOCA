@@ -1,0 +1,124 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Rajdhani', sans-serif;
+  background: #000;
+  color: #fff;
+  overflow: hidden;
+  height: 100vh;
+}
+
+#root {
+  width: 100vw;
+  height: 100vh;
+}
+
+.matrix-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, #000 0%, #001122 50%, #000 100%);
+  z-index: -1;
+}
+
+.matrix-rain {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.word-node {
+  position: absolute;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.3s ease;
+}
+
+.word-node:hover {
+  transform: scale(1.1);
+  filter: brightness(1.2);
+}
+
+.central-word {
+  font-family: 'Orbitron', monospace;
+  font-weight: 900;
+  font-size: 3rem;
+  text-shadow: 0 0 20px #00ff00, 0 0 40px #00ff00, 0 0 60px #00ff00;
+  color: #00ff00;
+  z-index: 10;
+}
+
+.connected-word {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 600;
+  font-size: 1.2rem;
+  text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff;
+  color: #00ffff;
+  z-index: 5;
+}
+
+.connection-line {
+  position: absolute;
+  background: linear-gradient(90deg, #00ff00, #00ffff);
+  height: 2px;
+  transform-origin: left center;
+  z-index: 2;
+  box-shadow: 0 0 10px #00ff00;
+}
+
+.controls {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.8);
+  padding: 20px;
+  border-radius: 10px;
+  border: 2px solid #00ff00;
+}
+
+.controls input {
+  background: #000;
+  border: 1px solid #00ff00;
+  color: #00ff00;
+  padding: 10px;
+  border-radius: 5px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1rem;
+  margin: 5px 0;
+  width: 200px;
+}
+
+.controls button {
+  background: #00ff00;
+  color: #000;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  margin: 5px;
+  transition: all 0.3s ease;
+}
+
+.controls button:hover {
+  background: #00ffff;
+  transform: scale(1.05);
+}
+
+.controls h3 {
+  color: #00ff00;
+  margin-bottom: 10px;
+  font-family: 'Orbitron', monospace;
+}
